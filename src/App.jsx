@@ -1,43 +1,57 @@
 import { useState, useEffect } from "react";
 
+import { io } from "socket.io-client";
+
+// Connect to the backend
+const socket = io("http://localhost:3001");
+
+// ─── Real Socket.IO Connection ──────────────────────────────────────────────────
 function useEventSocket() {
-  const [activeStartup] = useState({
-    name: "EcoGrid Technologies",
-    tagline: "Powering Tomorrow's Cities",
-    category: "CleanTech",
-    founderName: "Priya Sharma",
-    pitchOrder: 3,
-    totalPitches: 8,
+  const [activeStartup, setActiveStartup] = useState({
+    name: "Loading...",
+    tagline: "",
+    category: "",
+    founderName: "",
+    pitchOrder: 0,
+    totalPitches: 0,
   });
   const [pollOpen, setPollOpen] = useState(false);
   const [liveStats, setLiveStats] = useState({
-    totalVoters: 142,
-    likeIdea: 89,
-    likePresentation: 104,
-    wouldJoin: 67,
-    satisfactionScore: 74,
+    totalVoters: 0,
+    likeIdea: 0,
+    likePresentation: 0,
+    wouldJoin: 0,
+    satisfactionScore: 0,
   });
 
   useEffect(() => {
-    const t = setTimeout(() => setPollOpen(true), 4000);
-    return () => clearTimeout(t);
+    socket.on("initialData", (data) => {
+      setActiveStartup(data.activeStartup);
+      setPollOpen(data.pollOpen);
+      setLiveStats(data.liveStats);
+    });
+
+    socket.on("statsUpdate", (newStats) => {
+      setLiveStats(newStats);
+    });
+
+    socket.on("pollStateUpdate", (isOpen) => {
+      setPollOpen(isOpen);
+    });
+
+    socket.on("startupUpdate", (newStartup) => {
+      setActiveStartup(newStartup);
+    });
+
+    return () => {
+      socket.off("initialData");
+      socket.off("statsUpdate");
+      socket.off("pollStateUpdate");
+      socket.off("startupUpdate");
+    };
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveStats((prev) => {
-        const tv = prev.totalVoters + Math.floor(Math.random() * 3);
-        const li = prev.likeIdea + (Math.random() > 0.3 ? 1 : 0);
-        const lp = prev.likePresentation + (Math.random() > 0.35 ? 1 : 0);
-        const wj = prev.wouldJoin + (Math.random() > 0.5 ? 1 : 0);
-        const score = Math.round(((li + lp + wj) / (tv * 3)) * 100);
-        return { totalVoters: tv, likeIdea: li, likePresentation: lp, wouldJoin: wj, satisfactionScore: score };
-      });
-    }, 2800);
-    return () => clearInterval(interval);
-  }, []);
-
-  return { activeStartup, pollOpen, liveStats };
+  return { activeStartup, pollOpen, liveStats, socket };
 }
 
 // ─── Dot Grid + Soft Blob Background ─────────────────────────────────────────
@@ -350,7 +364,8 @@ function VotingScreen({ startup, userName, onSubmit, liveStats }) {
   const handleSubmit = () => {
     if (!allDone || submitting) return;
     setSubmitting(true);
-    setTimeout(() => onSubmit({ likeIdea: q1, likePresentation: q2, wouldJoin: q3 }), 900);
+    // Send vote to the backend
+    onSubmit({ likeIdea: q1, likePresentation: q2, wouldJoin: q3 });
   };
 
   const questions = [
@@ -399,7 +414,7 @@ function VotingScreen({ startup, userName, onSubmit, liveStats }) {
           );
         })}
 
-     
+
         <div style={{ marginBottom: 14 }}>
           <button onClick={() => setStatsOpen(!statsOpen)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", background: "none", border: "none", cursor: "pointer", padding: "8px 0", color: "#64748B", fontSize: 12, fontWeight: 600 }}>
             <span>📊 See how others are voting live</span>
@@ -487,7 +502,7 @@ export default function AudiencePortal() {
   const [screen, setScreen] = useState("landing");
   const [userName, setUserName] = useState("");
   const [votes, setVotes] = useState(null);
-  const { activeStartup, pollOpen, liveStats } = useEventSocket();
+  const { activeStartup, pollOpen, liveStats, socket } = useEventSocket();
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -514,7 +529,11 @@ export default function AudiencePortal() {
     <div style={{ background: "#F8FAFD", minHeight: "100dvh" }}>
       {screen === "landing" && <LandingScreen liveStats={liveStats} onJoin={(n) => { setUserName(n); setScreen("watching"); }} />}
       {screen === "watching" && <WatchingScreen startup={activeStartup} userName={userName} pollOpen={pollOpen} liveStats={liveStats} onPollReady={() => setScreen("voting")} />}
-      {screen === "voting" && <VotingScreen startup={activeStartup} userName={userName} liveStats={liveStats} onSubmit={(v) => { setVotes(v); setScreen("submitted"); }} />}
+      {screen === "voting" && <VotingScreen startup={activeStartup} userName={userName} liveStats={liveStats} onSubmit={(v) => {
+        socket.emit("vote", v);
+        setVotes(v);
+        setScreen("submitted");
+      }} />}
       {screen === "submitted" && <SubmittedScreen startup={activeStartup} votes={votes} liveStats={liveStats} />}
     </div>
   );
