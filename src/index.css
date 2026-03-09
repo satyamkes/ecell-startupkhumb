@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply bg-screen-bg font-body text-brand-navy;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  ::-webkit-scrollbar       { width: 4px; }
+  ::-webkit-scrollbar-track  { background: transparent; }
+  ::-webkit-scrollbar-thumb  { @apply bg-orange-200 rounded-full; }
+}
+
+@layer components {
+
+  .card {
+    @apply bg-white border border-slate-100 rounded-2xl shadow-card;
+  }
+  .card-interactive {
+    @apply card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply w-full bg-orange-gradient text-white font-display font-bold text-base
+           rounded-2xl py-4 px-6 flex items-center justify-center gap-2.5
+           shadow-orange transition-all duration-150
+           hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 active:shadow-md
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 disabled:shadow-none;
+  }
+  .btn-ghost {
+    @apply border-2 border-slate-200 text-slate-500 font-semibold text-sm
+           rounded-xl py-3 px-4 bg-slate-50 transition-all duration-150
+           hover:border-slate-300 hover:bg-white cursor-pointer;
+  }
+
+
+  .input-field {
+    @apply w-full bg-white border-2 border-slate-200 rounded-xl
+           py-3.5 px-4 text-brand-navy text-base
+           outline-none transition-all duration-200
+           focus:border-brand-orange focus:ring-4 focus:ring-orange-100
+           placeholder:text-slate-400;
+  }
+
+  /* Live badge */
+  .live-chip {
+    @apply flex items-center gap-1.5 bg-red-50 border border-red-200
+           text-red-600 rounded-full px-3 py-1.5
+           text-[10px] font-black tracking-widest uppercase;
+  }
+
+
+  .category-pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1
+           text-[11px] font-bold tracking-wide border;
+  }
+
+  .section-label {
+    @apply flex items-center gap-3 text-[10px] font-black tracking-[2px]
+           text-slate-400 uppercase my-4;
+  }
+  .section-label::before,
+  .section-label::after {
+    content: '';
+    @apply flex-1 h-px bg-slate-200;
+  }
+
+
+  .stat-badge {
+    @apply text-xs font-bold px-2.5 py-1 rounded-full border;
+  }
+
+  .judge-card {
+    @apply bg-judge-card border border-judge-border rounded-2xl;
+  }
+
+  .judge-section-label {
+    @apply text-[10px] font-black text-white/30 tracking-[1.8px] uppercase;
+  }
+}
+
+@layer utilities {
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #F97316, #F59E0B);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bg-dots {
+    background-image: radial-gradient(circle, rgba(14,27,77,0.18) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .ring-spinner {
+    @apply w-5 h-5 rounded-full border-2 border-white/30 border-t-white animate-spin-ring;
+  }
+}
