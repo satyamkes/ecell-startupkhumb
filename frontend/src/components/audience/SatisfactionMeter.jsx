@@ -2,9 +2,9 @@ export default function SatisfactionMeter({ stats, compact = false }) {
   const pct = stats?.satisfactionScore ?? 0;
 
   const { color, bgClass, borderClass, label, emoji } =
-    pct >= 75 ? { color: "#16A34A", bgClass: "bg-green-50",  borderClass: "border-green-200", label: "Crowd Loves It",   emoji: "🔥" } :
-    pct >= 50 ? { color: "#EA580C", bgClass: "bg-orange-50", borderClass: "border-orange-200", label: "Mixed Reactions", emoji: "⚡" } :
-                { color: "#DC2626", bgClass: "bg-red-50",    borderClass: "border-red-200",    label: "Needs Work",      emoji: "🤔" };
+    pct >= 75 ? { color: "#16A34A", bgClass: "bg-green-50", borderClass: "border-green-200", label: "Crowd Loves It", emoji: "🔥" } :
+      pct >= 50 ? { color: "#EA580C", bgClass: "bg-orange-50", borderClass: "border-orange-200", label: "Mixed Reactions", emoji: "⚡" } :
+        { color: "#DC2626", bgClass: "bg-red-50", borderClass: "border-red-200", label: "Needs Work", emoji: "🤔" };
 
   if (compact) {
     const r = 11, circ = 2 * Math.PI * r;
@@ -22,7 +22,7 @@ export default function SatisfactionMeter({ stats, compact = false }) {
               style={{ transition: "stroke-dashoffset 1s ease" }} />
           </svg>
           <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black"
-                style={{ color }}>{pct}%</span>
+            style={{ color }}>{pct}%</span>
         </div>
         <div className="leading-none">
           <p className="text-[9px] font-bold text-slate-400 tracking-wide">CROWD</p>
@@ -36,21 +36,21 @@ export default function SatisfactionMeter({ stats, compact = false }) {
 
   const R = 40, C = 2 * Math.PI * R;
   const barItems = [
-    { key: "likeIdea",         label: "Liked the Idea",    icon: "💡", color: "#F97316" },
-    { key: "likePresentation", label: "Liked the Pitch",   icon: "🎤", color: "#3B82F6" },
-    { key: "wouldJoin",        label: "Would Join",         icon: "🚀", color: "#22C55E" },
+    { key: "likeIdea", label: "Liked the Idea", icon: "💡", color: "#F97316" },
+    { key: "likePresentation", label: "Liked the Pitch", icon: "🎤", color: "#3B82F6" },
+    { key: "wouldJoin", label: "Would Join", icon: "🚀", color: "#22C55E" },
   ];
-  const tv = stats?.totalVoters ?? 1;
+  const tv = Math.max(stats?.totalVoters ?? 0, 1);
 
-  const cumulativePct = Math.round(
-    ((stats.likeIdea + stats.likePresentation + stats.wouldJoin) / (tv * 3)) * 100
-  );
+  const cumulativePct = (stats?.totalVoters ?? 0) > 0
+    ? Math.round(((stats.likeIdea + stats.likePresentation + stats.wouldJoin) / (tv * 3)) * 100)
+    : 0;
 
   return (
     <div className={`card overflow-hidden`}>
 
       <div className="h-1 w-full rounded-t-2xl"
-           style={{ background: `linear-gradient(90deg, #F97316, ${color})` }} />
+        style={{ background: `linear-gradient(90deg, #F97316, ${color})` }} />
 
       <div className="p-5">
         {/* Header row */}
@@ -79,7 +79,7 @@ export default function SatisfactionMeter({ stats, compact = false }) {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-xl font-black font-display leading-none"
-                    style={{ color }}>{pct}%</span>
+                style={{ color }}>{pct}%</span>
               <span className="text-[9px] font-bold text-slate-400 tracking-wide mt-0.5">
                 SATISFIED
               </span>
@@ -90,7 +90,7 @@ export default function SatisfactionMeter({ stats, compact = false }) {
         <div className="space-y-3 mb-5">
           {barItems.map(({ key, label, icon, color: c }) => {
             const count = stats[key] ?? 0;
-            const bp    = Math.round((count / tv) * 100);
+            const bp = Math.round((count / tv) * 100);
             return (
               <div key={key}>
                 <div className="flex justify-between items-center mb-1.5">
@@ -153,7 +153,7 @@ export default function SatisfactionMeter({ stats, compact = false }) {
         <div className="flex items-center justify-center gap-2 mt-4 pt-3 border-t border-slate-100">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" />
           <span className="text-[11px] text-slate-400 font-medium">
-            {tv.toLocaleString()} votes cast · updates in real-time
+            {(stats?.totalVoters ?? 0).toLocaleString()} votes cast · updates in real-time
           </span>
         </div>
       </div>
