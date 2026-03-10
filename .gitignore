@@ -1,27 +1,30 @@
-# --- OS Metadata ---
-.DS_Store           # macOS specific
-Thumbs.db           # Windows specific
+# OS
+.DS_Store
+Thumbs.db
 
-# --- Environment & Secrets (CRITICAL) ---
+# Secrets & env
 .env
-.env.local
+.env.*
 *.pem
 *.key
 
-# --- Build & Dependencies ---
-node_modules/       # JavaScript/Node
-__pycache__/        # Python
-*.py[cod]           # Python compiled files
-target/             # Rust/Java (Maven)
-bin/                # General compiled binaries
-obj/                # C# / .NET
+# Dependencies
+node_modules/
+**/node_modules/
 
-# --- Logs & Performance ---
+# Build outputs
+dist/
+**/dist/
+
+# Logs
 *.log
 npm-debug.log*
 yarn-error.log*
 
-# --- IDE Configs ---
-.vscode/            # Visual Studio Code (optional, but keeps settings local)
-.idea/              # JetBrains (IntelliJ, WebStorm, etc.)
-*.swp               # Vim swap files
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker
+.docker/

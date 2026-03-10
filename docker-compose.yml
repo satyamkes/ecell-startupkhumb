@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  # ── Backend: Express + Socket.IO ────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: khumb-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend: Vite build → Nginx ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Point the frontend bundle at the backend.
+        # Change to your deployed domain in production.
+        VITE_BACKEND_URL: http://localhost:3001
+    container_name: khumb-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
